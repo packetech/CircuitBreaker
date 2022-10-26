@@ -1,0 +1,220 @@
+PS C:\Users\Ndi\Desktop\CircuitBreaker> python
+Python 3.10.0 (tags/v3.10.0:b494f59, Oct  4 2021, 19:00:18) [MSC v.1929 64 bit (AMD64)] on win32
+Type "help", "copyright", "credits" or "license" for more information.
+>>>
+>>>
+>>> from Circuit_Breaker import CircuitBreaker
+>>> from testCode import make_request, faulty_endpoint, success_endpoint
+>>> breaker = CircuitBreaker(make_request, exceptions=(Exception,), error_threshold=3, time_window=20)
+>>>
+>>> breaker.make_remote_call(success_endpoint)
+Call to http://localhost:5000/success succeed with status code = 200
+04:05:20,688 INFO: Success: Remote call
+<Response [200]>
+>>>
+>>>
+>>> breaker.make_remote_call(success_endpoint)
+Call to http://localhost:5000/success succeed with status code = 200
+04:05:25,930 INFO: Success: Remote call
+<Response [200]>
+>>>
+>>>
+>>> breaker.make_remote_call(faulty_endpoint)
+Call to http://localhost:5000/failure failed with status code = 500
+Call to http://localhost:5000/failure failed
+04:05:38,98 INFO: Failure: Remote call
+Traceback (most recent call last):
+  File "C:\Users\Ndi\Desktop\CircuitBreaker\Circuit_Breaker.py", line 57, in handle_closed_state
+    ret_val = self.http_client(*args, **kwargs)
+  File "C:\Users\Ndi\Desktop\CircuitBreaker\testCode.py", line 21, in make_request
+    raise Exception("Server Issue")
+Exception: Server Issue
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Users\Ndi\Desktop\CircuitBreaker\Circuit_Breaker.py", line 114, in make_remote_call
+    return self.handle_closed_state(*args, **kwargs)
+  File "C:\Users\Ndi\Desktop\CircuitBreaker\Circuit_Breaker.py", line 75, in handle_closed_state
+    raise RemoteCallFailedException from e
+Circuit_Breaker.RemoteCallFailedException
+>>>
+>>>
+>>>
+>>>
+>>> breaker.make_remote_call(faulty_endpoint)
+Call to http://localhost:5000/failure failed
+04:05:43,548 INFO: Failure: Remote call
+Traceback (most recent call last):
+  File "C:\Python310\lib\site-packages\urllib3\connectionpool.py", line 449, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "C:\Python310\lib\site-packages\urllib3\connectionpool.py", line 444, in _make_request
+    httplib_response = conn.getresponse()
+  File "C:\Python310\lib\http\client.py", line 1368, in getresponse
+    response.begin()
+  File "C:\Python310\lib\http\client.py", line 317, in begin
+    version, status, reason = self._read_status()
+  File "C:\Python310\lib\http\client.py", line 278, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "C:\Python310\lib\socket.py", line 705, in readinto
+    return self._sock.recv_into(b)
+TimeoutError: timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Ndi\AppData\Roaming\Python\Python310\site-packages\requests\adapters.py", line 489, in send
+    resp = conn.urlopen(
+  File "C:\Python310\lib\site-packages\urllib3\connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "C:\Python310\lib\site-packages\urllib3\util\retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "C:\Python310\lib\site-packages\urllib3\packages\six.py", line 770, in reraise
+    raise value
+  File "C:\Python310\lib\site-packages\urllib3\connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "C:\Python310\lib\site-packages\urllib3\connectionpool.py", line 451, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "C:\Python310\lib\site-packages\urllib3\connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=0.3)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Ndi\Desktop\CircuitBreaker\Circuit_Breaker.py", line 57, in handle_closed_state
+    ret_val = self.http_client(*args, **kwargs)
+  File "C:\Users\Ndi\Desktop\CircuitBreaker\testCode.py", line 15, in make_request
+    response = requests.get(url, timeout=0.3)
+  File "C:\Users\Ndi\AppData\Roaming\Python\Python310\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\Ndi\AppData\Roaming\Python\Python310\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "C:\Users\Ndi\AppData\Roaming\Python\Python310\site-packages\requests\sessions.py", line 587, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\Ndi\AppData\Roaming\Python\Python310\site-packages\requests\sessions.py", line 701, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\Ndi\AppData\Roaming\Python\Python310\site-packages\requests\adapters.py", line 578, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=0.3)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Users\Ndi\Desktop\CircuitBreaker\Circuit_Breaker.py", line 114, in make_remote_call
+    return self.handle_closed_state(*args, **kwargs)
+  File "C:\Users\Ndi\Desktop\CircuitBreaker\Circuit_Breaker.py", line 75, in handle_closed_state
+    raise RemoteCallFailedException from e
+Circuit_Breaker.RemoteCallFailedException
+>>>
+>>>
+>>>
+>>>
+>>> breaker.make_remote_call(faulty_endpoint)
+Call to http://localhost:5000/failure failed
+04:05:47,628 INFO: Failure: Remote call
+04:05:47,630 INFO: Changed state from closed to open
+Traceback (most recent call last):
+  File "C:\Python310\lib\site-packages\urllib3\connectionpool.py", line 449, in _make_request
+    six.raise_from(e, None)
+  File "<string>", line 3, in raise_from
+  File "C:\Python310\lib\site-packages\urllib3\connectionpool.py", line 444, in _make_request
+    httplib_response = conn.getresponse()
+  File "C:\Python310\lib\http\client.py", line 1368, in getresponse
+    response.begin()
+  File "C:\Python310\lib\http\client.py", line 317, in begin
+    version, status, reason = self._read_status()
+  File "C:\Python310\lib\http\client.py", line 278, in _read_status
+    line = str(self.fp.readline(_MAXLINE + 1), "iso-8859-1")
+  File "C:\Python310\lib\socket.py", line 705, in readinto
+    return self._sock.recv_into(b)
+TimeoutError: timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Ndi\AppData\Roaming\Python\Python310\site-packages\requests\adapters.py", line 489, in send
+    resp = conn.urlopen(
+  File "C:\Python310\lib\site-packages\urllib3\connectionpool.py", line 785, in urlopen
+    retries = retries.increment(
+  File "C:\Python310\lib\site-packages\urllib3\util\retry.py", line 550, in increment
+    raise six.reraise(type(error), error, _stacktrace)
+  File "C:\Python310\lib\site-packages\urllib3\packages\six.py", line 770, in reraise
+    raise value
+  File "C:\Python310\lib\site-packages\urllib3\connectionpool.py", line 703, in urlopen
+    httplib_response = self._make_request(
+  File "C:\Python310\lib\site-packages\urllib3\connectionpool.py", line 451, in _make_request
+    self._raise_timeout(err=e, url=url, timeout_value=read_timeout)
+  File "C:\Python310\lib\site-packages\urllib3\connectionpool.py", line 340, in _raise_timeout
+    raise ReadTimeoutError(
+urllib3.exceptions.ReadTimeoutError: HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=0.3)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Ndi\Desktop\CircuitBreaker\Circuit_Breaker.py", line 57, in handle_closed_state
+    ret_val = self.http_client(*args, **kwargs)
+  File "C:\Users\Ndi\Desktop\CircuitBreaker\testCode.py", line 15, in make_request
+    response = requests.get(url, timeout=0.3)
+  File "C:\Users\Ndi\AppData\Roaming\Python\Python310\site-packages\requests\api.py", line 73, in get
+    return request("get", url, params=params, **kwargs)
+  File "C:\Users\Ndi\AppData\Roaming\Python\Python310\site-packages\requests\api.py", line 59, in request
+    return session.request(method=method, url=url, **kwargs)
+  File "C:\Users\Ndi\AppData\Roaming\Python\Python310\site-packages\requests\sessions.py", line 587, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\Ndi\AppData\Roaming\Python\Python310\site-packages\requests\sessions.py", line 701, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\Ndi\AppData\Roaming\Python\Python310\site-packages\requests\adapters.py", line 578, in send
+    raise ReadTimeout(e, request=request)
+requests.exceptions.ReadTimeout: HTTPConnectionPool(host='localhost', port=5000): Read timed out. (read timeout=0.3)
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Users\Ndi\Desktop\CircuitBreaker\Circuit_Breaker.py", line 114, in make_remote_call
+    return self.handle_closed_state(*args, **kwargs)
+  File "C:\Users\Ndi\Desktop\CircuitBreaker\Circuit_Breaker.py", line 75, in handle_closed_state
+    raise RemoteCallFailedException from e
+Circuit_Breaker.RemoteCallFailedException
+>>>
+>>>
+>>>
+>>>
+>>>
+>>> breaker.make_remote_call(faulty_endpoint)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Users\Ndi\Desktop\CircuitBreaker\Circuit_Breaker.py", line 116, in make_remote_call
+    return self.handle_open_state(*args, **kwargs)
+  File "C:\Users\Ndi\Desktop\CircuitBreaker\Circuit_Breaker.py", line 81, in handle_open_state
+    raise RemoteCallFailedException(f"Retry after {self.last_attempt_timestamp+self.time_window-current_timestamp} secs")
+Circuit_Breaker.RemoteCallFailedException: Retry after 15.088449001312256 secs
+>>>
+>>>
+>>>
+>>> breaker.make_remote_call(success_endpoint)
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "C:\Users\Ndi\Desktop\CircuitBreaker\Circuit_Breaker.py", line 116, in make_remote_call
+    return self.handle_open_state(*args, **kwargs)
+  File "C:\Users\Ndi\Desktop\CircuitBreaker\Circuit_Breaker.py", line 81, in handle_open_state
+    raise RemoteCallFailedException(f"Retry after {self.last_attempt_timestamp+self.time_window-current_timestamp} secs")
+Circuit_Breaker.RemoteCallFailedException: Retry after 5.375266075134277 secs
+>>>
+>>>
+>>>
+>>>
+>>> breaker.make_remote_call(success_endpoint)
+04:06:46,660 INFO: Changed state from open to half_open
+Call to http://localhost:5000/success succeed with status code = 200
+04:06:46,978 INFO: Changed state from half_open to closed
+<Response [200]>
+>>>
+
+
+
+
